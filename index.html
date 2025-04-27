@@ -3,11 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pingora Chat</title>
+    <title>Pingora</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="chat-container">
+<body class="login-page">
+
+    <!-- Login/Signup Container -->
+    <div id="auth-container" class="login-container">
+        <h1>Welcome to Pingora</h1>
+        <input type="text" id="emailOrPhone" placeholder="Email or Phone number">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p>Don't have an account? <a href="#" onclick="signup()">Sign Up</a></p>
+    </div>
+
+    <!-- Chat Container (Hidden at first) -->
+    <div id="chat-container" class="chat-container" style="display:none;">
         <div class="header">
             <h2>Pingora Chat</h2>
         </div>
@@ -19,6 +30,7 @@
             <button onclick="sendMessage()">Send</button>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
-                                                  </html>
+            </html>
