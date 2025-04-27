@@ -1,41 +1,78 @@
-// Handle Login
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCaHbWQe6_KKVk4geBvCZpJci8uhP-ziac",
+  authDomain: "pingora-9253a.firebaseapp.com",
+  projectId: "pingora-9253a",
+  storageBucket: "pingora-9253a.appspot.com",
+  messagingSenderId: "1086811339661",
+  appId: "1:1086811339661:web:eac94693942cb49782dbc4"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function signUp() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      alert('Sign up successful! Please log in.');
+    })
+    .catch(error => {
+      alert(error.message);
+    });
+}
+
 function login() {
-    let emailOrPhone = document.getElementById("emailOrPhone").value;
-    let password = document.getElementById("password").value;
-
-    if (emailOrPhone && password) {
-        // Fake login - Just hide auth and show chat
-        document.getElementById("auth-container").style.display = "none";
-        document.getElementById("chat-container").style.display = "flex";
-
-        // Also change background color
-        document.body.className = "chat-page";
-    } else {
-        alert("Please fill all fields!");
-    }
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      document.getElementById('auth-container').style.display = 'none';
+      document.getElementById('chat-container').style.display = 'block';
+      loadMessages();
+    })
+    .catch(error => {
+      alert(error.message);
+    });
 }
 
-// Handle Sign Up (Fake)
-function signup() {
-    alert("Signup successful! Please login now.");
+function logout() {
+  auth.signOut().then(() => {
+    document.getElementById('chat-container').style.display = 'none';
+    document.getElementById('auth-container').style.display = 'flex';
+  });
 }
 
-// Handle Sending Messages
 function sendMessage() {
-    let messageInput = document.getElementById("messageInput");
-    let messageText = messageInput.value;
+  const messageInput = document.getElementById('messageInput');
+  const message = messageInput.value;
+  const user = auth.currentUser;
 
-    if (messageText.trim() !== "") {
-        let messageDiv = document.createElement("div");
-        messageDiv.className = "message";
-        messageDiv.textContent = messageText;
-        document.getElementById("messages").appendChild(messageDiv);
+  if (message.trim() !== "") {
+    db.collection('messages').add({
+      text: message,
+      user: user.email,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    messageInput.value = "";
+  }
+}
 
-        // Auto-scroll
-        let messagesDiv = document.getElementById("messages");
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-        // Clear input
-        messageInput.value = "";
-    }
+function loadMessages() {
+  db.collection('messages')
+    .orderBy('timestamp')
+    .onSnapshot(snapshot => {
+      const messagesDiv = document.getElementById('messages');
+      messagesDiv.innerHTML = "";
+      snapshot.forEach(doc => {
+        const message = doc.data();
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.textContent = `${message.user}: ${message.text}`;
+        messagesDiv.appendChild(messageElement);
+      });
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
 }
